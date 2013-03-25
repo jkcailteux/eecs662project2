@@ -11,7 +11,7 @@
 	(num (n number?))
 	(id (name symbol?))
 	(op (oper symbol?) (lhs CFAE?) (rhs CFAE?))
-	(fun (fun-name symbol?) (body CFAE?))
+	(fun (param symbol?) (body CFAE?))
 	(app (funct CFAE?) (arg CFAE?))
 	(if0 (c CFAE?) (t CFAE?) (e CFAE?)))
 
@@ -52,7 +52,7 @@
 
 ;;; Interpreter
 (define interp-cfae
-	(lambda (expr ds)
+  (lambda (expr ds)
 		(type-case CFAE expr
 			(num (n) n)
 			(id (v) (lookup v ds))
@@ -62,8 +62,8 @@
 				(local((define fun-val (interp-cfae func ds)))
 					(interp-cfae (fun-body fun-val)
 						(aSub (fun-param fun-val)
-                                                  (interp-cfae arg ds) 
-                                                  ds))))
+                                                  (interp-cfae arg ds)
+                                                   ds))))
 			(if0 (c t e) (cond ((= (interp-cfae c ds) 0)
 							(interp-cfae t ds))
 							(else (interp-cfae e ds)))))))
@@ -72,8 +72,15 @@
 
 ;;; Evaluator
 (define eval-cfae
-	(lambda (cfae)
-		(interp-cfae cfae mtSub)))
+  (lambda (exp)
+		(interp-cfae exp (mtSub))))
 
 ;;;Testing
+(test (eval-cfae (num 3)) 3)
+(test (eval-cfae (op 'add (num 1) (num 2))) 3)
+(test (eval-cfae (fun 'x (op 'mul (id 'x) (num 2)))) (fun 'x (op 'mul (id 'x) (num 2))))
+(test (eval-cfae (if0 (op 'sub (num 1) (num 1)) (num 10) (num 0))) 10)
+(test (eval-cfae (if0 (op 'sub (num 2) (num 1)) (num 10) (num 0))) 0)
+(test (eval-cfae (app (fun 'x (id 'x)) (num 5))) 5)
+(test (eval-cfae (if0 (app (fun 'y (op 'div (num 10) (id 'y))) (num 2)) (num 1) (num 2))) 2)
 

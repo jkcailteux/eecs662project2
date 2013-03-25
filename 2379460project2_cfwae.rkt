@@ -6,19 +6,22 @@
 
 #lang plai
 
-;;;Define CFWAE
+;Define CFWAE
 (define-type CFWAE
 	(num (n number?))
 	(id (name symbol?))
 	(op (oper symbol?) (lhs CFWAE?) (rhs CFWAE?))
 	(fun (param symbol?) (body CFWAE?))
 	(app (funct CFWAE?) (arg CFWAE?))
-	(if0 (c CFWAE?) (t CFWAE?) (e CFWAE?)))
+	(if0 (c CFWAE?) (t CFWAE?) (e CFWAE?))
+    (with (id symbol?) (expr CFWAE?) (body CFWAE?))
+    (cond0 (ct list?) (ed CFWAE?)))
 
-;;;Define Deferred Substitution
+;Define Deferred Substitution
 (define-type DefrdSub
 	(mtSub)
-	(aSub (name symbol?) (value number?) (ds DefrdSub?)))
+	(aSub (name symbol?) (value number?) (ds DefrdSub?))
+    (afSub (name symbol?) (func CFWAE?) (ds DefrdSub?))
 
 ;operators
 ;list of symbol operator pairs
@@ -40,7 +43,7 @@
                 )
           )))
 
-;;Lookup for Deferred Sub
+;Lookup for Deferred Sub
 (define lookup
 	(lambda (name ds)
 		(type-case DefrdSub ds
@@ -50,7 +53,7 @@
 				     v
 				    (lookup name rds))))))
 
-;;; Interpreter
+;Interpreter
 (define interp-cfwae
   (lambda (expr ds)
 		(type-case CFWAE expr
@@ -67,15 +70,20 @@
 			(if0 (c t e) (cond ((= (interp-cfwae c ds) 0)
 							(interp-cfwae t ds))
 							(else (interp-cfwae e ds)))))))
-			
+
+;Prelude-not tested
+(define prelude
+  (aSub 'pi (num 3.1415927)
+        (aSub 'area (fun 'r (mul (num 3.1415927) (mul (id 'r) (id 'r))))
+              (aSub 'inc (fun 'i (add (id 'i) (num 1))) (mtSub))))) 
 			
 
-;;; Evaluator
+;Evaluator
 (define eval-cfwae
-  (lambda (exp)
-		(interp-cfwae exp (mtSub))))
+  (lambda (expr)
+		(interp-cfwae expr (mtSub))))
 
-;;;Testing
+;Testing
 ;(test (eval-cfwae (num 3)) 3)
 ;(test (eval-cfwae (op 'add (num 1) (num 2))) 3)
 ;(test (eval-cfwae (fun 'x (op 'mul (id 'x) (num 2)))) (fun 'x (op 'mul (id 'x) (num 2))))

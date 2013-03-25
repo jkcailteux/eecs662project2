@@ -6,7 +6,7 @@
 
 #lang plai
 
-;;;Define CFAE
+;Define CFAE
 (define-type CFAE
 	(num (n number?))
 	(id (name symbol?))
@@ -15,7 +15,7 @@
 	(app (funct CFAE?) (arg CFAE?))
 	(if0 (c CFAE?) (t CFAE?) (e CFAE?)))
 
-;;;Define Deferred Substitution
+;Define Deferred Substitution
 (define-type DefrdSub
 	(mtSub)
 	(aSub (name symbol?) (value number?) (ds DefrdSub?)))
@@ -40,7 +40,7 @@
                 )
           )))
 
-;;Lookup for Deferred Sub
+;Lookup for Deferred Sub
 (define lookup
 	(lambda (name ds)
 		(type-case DefrdSub ds
@@ -50,13 +50,17 @@
 				     v
 				    (lookup name rds))))))
 
-;;; Interpreter
+;Interpreter
 (define interp-cfae
   (lambda (expr ds)
 		(type-case CFAE expr
 			(num (n) n)
 			(id (v) (lookup v ds))
-			(op (oper l r) ((get-binop oper binop) (interp-cfae l ds) (interp-cfae r ds)))
+			(op (oper l r) (if (or (fun? l) (fun? r))
+							(error 'interp-cfae "Cannot perform arithmetic expression on function")
+				((get-binop oper binop) 
+                            (interp-cfae l ds) 
+                            (interp-cfae r ds))))
 			(fun (id body) expr)
 			(app (func arg)
 				(local((define fun-val (interp-cfae func ds)))
@@ -70,12 +74,12 @@
 			
 			
 
-;;; Evaluator
+;Evaluator
 (define eval-cfae
   (lambda (exp)
 		(interp-cfae exp (mtSub))))
 
-;;;Testing
+;Testing
 (test (eval-cfae (num 3)) 3)
 (test (eval-cfae (op 'add (num 1) (num 2))) 3)
 (test (eval-cfae (fun 'x (op 'mul (id 'x) (num 2)))) (fun 'x (op 'mul (id 'x) (num 2))))
@@ -83,4 +87,7 @@
 (test (eval-cfae (if0 (op 'sub (num 2) (num 1)) (num 10) (num 0))) 0)
 (test (eval-cfae (app (fun 'x (id 'x)) (num 5))) 5)
 (test (eval-cfae (if0 (app (fun 'y (op 'div (num 10) (id 'y))) (num 2)) (num 1) (num 2))) 2)
+
+;Testing Error in Interpreter
+(eval-cfae (op 'add (num 1) (fun 'x (op 'mul (id 'x) (num 2)))))
 

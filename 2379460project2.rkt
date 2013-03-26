@@ -158,7 +158,7 @@
                      (elab-cond0W (cdr ct) ed))))))
 
 
-;Prelude-not tested
+;Prelude
 (define prelude
   (aSub 'pi 3.1415927
         (afSub 'area (fun 'r (op 'mul (num 3.1415927) (op 'mul (id 'r) (id 'r))))
@@ -178,4 +178,8 @@
 ;(test (eval-cfwae (if0W (opW 'sub (numW 1) (numW 1)) (numW 10) (numW 0))) 10)
 ;(test (eval-cfwae (if0W (opW 'add (numW 22) (numW 1)) (numW 10) (numW 0))) 0
 ;(test (eval-cfwae (withW 'x (numW 5) (opW 'add (idW 'x) (numW 6)))) 11)
-(eval-cfwae (cond0W ((cons (numW 0) (numW 7))) (numW 11)))
+;(test (eval-cfwae (appW (idW 'area) (numW 5))) 78.5398175)
+;(test (eval-cfwae (opW 'mul (numW 2) (idW 'pi))) 6.2831854)
+;(test (eval-cfwae (opW 'mul (withW 'x (numW 5) (opW 'add (idW 'x) (numW 6))) (numW 2))) 22)
+;(test (eval-cfwae (appW (idW 'inc) (numW 3))) 4)
+;(eval-cfwae (cond0W ((numW 0) (numW 7)) (numW 11)))

@@ -84,7 +84,7 @@
   (lambda (exp)
 		(interp-cfae exp (mtSub))))
 
-;Testing
+;My Test Cases
 (test (eval-cfae (num 3)) 3)
 (test (eval-cfae (op 'add (num 1) (num 2))) 3)
 (test (eval-cfae (fun 'x (op 'mul (id 'x) (num 2)))) (fun 'x (op 'mul (id 'x) (num 2))))
@@ -92,8 +92,27 @@
 (test (eval-cfae (if0 (op 'sub (num 2) (num 1)) (num 10) (num 0))) 0)
 (test (eval-cfae (app (fun 'x (id 'x)) (num 5))) 5)
 (test (eval-cfae (if0 (app (fun 'y (op 'div (num 10) (id 'y))) (num 2)) (num 1) (num 2))) 2)
+;Provided Test Cases(Adapted)
+(test (eval-cfae (op 'add (num 1) (num 2))) 3)
+(test (eval-cfae (op 'mul (num 2) (num 2))) 4)
+(test (eval-cfae (if0 (num 0) (num 1) (num 2))) 1)
+(test (eval-cfae (app (fun 'x (id 'x)) (num 5))) 5)
+(test (eval-cfae (app (fun 'x (op 'add (id 'x) (num 1))) (num 1))) 2)
+(test (eval-cfae (if0 (app (fun 'x (op 'sub (id 'x) (num 2))) (num 3))
+                       (app (fun 'x (op 'mul (id 'x) (num 2))) (num 10))
+                       (app (fun 'x (op 'div (id 'x) (num 2))) (num 8)))) 4)
+(test (eval-cfae (app (if0 (num 0)
+                            (fun 'x (op 'add (id 'x) (num 1)))
+                            (fun 'x (op 'add (id 'x) (num 2))))
+                       (num 0))) 1)
 
-;Testing Error in Interpreter
+;Could not get this test case to work, not sure if valid syntax
+;(eval-cfae (app (app (fun 'x (fun 'y (op 'add (id 'x) (id 'y)))) (num 3)) (num 2)))
+
+(test (eval-cfae (fun 'x (op 'add (id 'x) (num 1)))) (fun 'x (op 'add (id 'x) (num 1))))
+(test (eval-cfae (fun 'x (id 'x))) (fun 'x (id 'x)))
+
+;Testing the Error function in the Interpreter
 ;(eval-cfae (op 'add (num 1) (fun 'x (op 'mul (id 'x) (num 2)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -170,7 +189,7 @@
   (lambda (expr)
 		(interp-cfae (elab-cfwae expr) prelude)))
 
-;Testing
+;My Test Cases
 (test (eval-cfwae (numW 3)) 3)
 (test (eval-cfwae (opW 'add (numW 3) (numW 2))) 5)
 (test (eval-cfwae (funW 'x (opW 'mul (idW 'x) (numW 2)))) (fun 'x (op 'mul (id 'x) (num 2))))
@@ -184,3 +203,13 @@
 (test (eval-cfwae (appW (idW 'inc) (numW 3))) 4)
 (test (eval-cfwae (cond0W (list (list (numW 0) (numW 2)) (list (numW 1) (numW 7))) (numW 4))) 2)
 (test (eval-cfwae (cond0W (list (list (numW 1) (numW 2)) (list (numW 1) (numW 7))) (numW 4))) 4)
+;Provided Test Cases(adapted)
+(test (eval-cfwae (cond0W (list (list(numW 1) (numW 2))(list (numW 0) (numW 15))) (numW 0))) 15)
+(test (eval-cfwae (withW 'x (numW 10) (opW 'add (idW 'x) (numW 5)))) 15)
+
+
+;Could not adapt this to my syntax for some reason
+;(eval-cfwae (withW 'add1 (funW 'x (opW 'add (idW 'x) (numW 1)))
+;                      (cond0W (list (list (appW (idW 'add1) (numW 0)) (numW 5))
+;                            (list (numW 3) (numW 4))
+;                            (list (numW 0) (appW (idW 'add1) (numW 2))))(numW 2))))
